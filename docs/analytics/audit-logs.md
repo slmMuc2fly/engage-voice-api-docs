@@ -320,9 +320,10 @@ To help developers navigate the audit logs, the following list represents the sy
 
 To build a reliable synchronization service (e.g., exporting audit logs to an external security database), developers should implement a "Sliding Window" polling strategy.
 
-### Handling Data Propagation Delay
 
-Administrative actions are not available for API retrieval in real-time. There is a **5-minute propagation delay** before logs are finalized in the search index.
+!!! important
+    ### Handling Data Propagation Delay
+    Administrative actions are not available for API retrieval in real-time. There is a **5-minute propagation delay** before logs are finalized in the search index.
 
 ### Recommended Polling Pattern
 
