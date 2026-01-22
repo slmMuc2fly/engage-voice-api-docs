@@ -338,25 +338,51 @@ To ensure 100% data integrity and account for the propagation delay, we recommen
 
 ### Sample Implementation (Python)
 
-This pattern ensures that your application always requests data that has safely passed the 5-minute propagation threshold.
+The following example demonstrates how to poll the API and persist the results into a local SQLite database for downstream reporting.
 
 ```python
 import requests
 import datetime
+import sqlite3
+import json
 
 # Configuration
 BASE_URL = "https://ringcx.ringcentral.com/voice/api/v1/admin/auditLogs/search"
 ACCOUNT_ID = "12345"
 
-def get_audit_logs():
-    # Calculate the window: 
-    # End time is 5 minutes ago (to respect propagation)
-    # Start time is 15 minutes before that
+def save_to_database(logs):
+    """Simulates persisting audit logs to an SQL database."""
+    conn = sqlite3.connect('audit_trail.db')
+    cursor = conn.cursor()
+    
+    # Create table if it doesn't exist
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS logs 
+        (id TEXT PRIMARY KEY, action TEXT, user TEXT, timestamp TEXT, raw_json TEXT)
+    ''')
+
+    for entry in logs:
+        cursor.execute('''
+            INSERT OR IGNORE INTO logs (id, action, user, timestamp, raw_json)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (
+            entry.get('id'),
+            entry.get('actionType'),
+            entry['authUser'].get('userName'),
+            entry.get('createTimeAsDateTime'),
+            json.dumps(entry)
+        ))
+    
+    conn.commit()
+    conn.close()
+    print(f"Successfully synced {len(logs)} entries.")
+
+def sync_audit_logs():
+    # 1. Define the 15-minute window with a 5-minute delay
     now = datetime.datetime.now(datetime.timezone.utc)
     end_time = now - datetime.timedelta(minutes=5)
     start_time = end_time - datetime.timedelta(minutes=15)
 
-    # Note: Use startDateTimeAsUnix for easier programmatic calculation
     payload = {
         "accountId": ACCOUNT_ID,
         "startDateTimeAsUnix": int(start_time.timestamp() * 1000),
@@ -364,16 +390,23 @@ def get_audit_logs():
         "ascOrDesc": "ASCENDING"
     }
 
-    # Replace with your actual authentication logic
     headers = {
         'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
         'Content-Type': 'application/json'
     }
 
+    # 2. Invoke the API
     response = requests.put(BASE_URL, json=payload, headers=headers)
-    response.raise_for_status()
-    return response.json()
+    
+    if response.status_code == 200:
+        logs = response.json()
+        # 3. Persist logs to database
+        save_to_database(logs)
+    else:
+        print(f"Error fetching logs: {response.status_code}")
 
+if __name__ == "__main__":
+    sync_audit_logs()
 ```
 
 
