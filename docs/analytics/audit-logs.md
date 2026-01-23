@@ -51,8 +51,9 @@ If the application has the correct scopes but the user lacks this platform permi
 > 
 > ```
 
-### Be Aware of Rate Limits
-Standard platform rate limiting applies to audit requests. The limit is 10 requests per minute. To ensure system stability during large data extractions, implement a robust backoff mechanism. If the API returns a `429 Too Many Requests` status code, utilize an exponential backoff strategy for subsequent retry attempts.
+!!! important
+    ### Be Aware of Rate Limits
+    Standard platform rate limiting applies to audit requests. The limit is 10 requests per minute. To ensure system stability during large data extractions, implement a robust backoff mechanism. If the API returns a `429 Too Many Requests` status code, utilize an exponential backoff strategy for subsequent retry attempts.
 
 
 ### Important Technical Constraints
