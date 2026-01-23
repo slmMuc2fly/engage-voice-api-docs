@@ -51,8 +51,7 @@ If the application has the correct scopes but the user lacks this platform permi
 > 
 > ```
 
-!!! important
-    ### Be Aware of Rate Limits
+!!! important "Important - Be Aware of Rate Limits"
     Standard platform rate limiting applies to audit requests. The limit is 10 requests per minute. To ensure system stability during large data extractions, implement a robust backoff mechanism. If the API returns a `429 Too Many Requests` status code, utilize an exponential backoff strategy for subsequent retry attempts.
 
 
@@ -322,8 +321,7 @@ To help developers navigate the audit logs, the following list represents the sy
 To build a reliable synchronization service (e.g., exporting audit logs to an external security database), developers should implement a "Sliding Window" polling strategy.
 
 
-!!! important
-    ### Handling Data Propagation Delay
+!!! important "Important - Handling Data Propagation Delay"
     Administrative actions are not available for API retrieval in real-time. There is a **5-minute propagation delay** before logs are finalized in the search index.
 
 ### Recommended Polling Pattern
